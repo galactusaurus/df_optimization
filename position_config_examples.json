@@ -1,0 +1,38 @@
+{
+  "_comment": "Example position configurations for different DraftKings contest types",
+  
+  "showdown_captain": {
+    "description": "Showdown Captain Mode - 1 Captain (1.5x points) + 5 Flex",
+    "positions": {
+      "CPT": 1,
+      "FLEX": 5
+    },
+    "typical_salary_cap": 50000
+  },
+  
+  "classic_nfl": {
+    "description": "Classic NFL - Full roster with specific positions",
+    "positions": {
+      "QB": 1,
+      "RB": 2,
+      "WR": 3,
+      "TE": 1,
+      "FLEX": 1,
+      "DST": 1
+    },
+    "typical_salary_cap": 50000
+  },
+  
+  "tiers": {
+    "description": "Tiers format - Select from each tier",
+    "positions": {
+      "TIER1": 1,
+      "TIER2": 1,
+      "TIER3": 1,
+      "TIER4": 1,
+      "TIER5": 1,
+      "TIER6": 1
+    },
+    "typical_salary_cap": null
+  }
+}
