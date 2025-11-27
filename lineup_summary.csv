@@ -1,8 +1,40 @@
-Roster Position,Player Name,Position,Team,Salary,Avg Points Per Game
-CPT,Miles Sanders,RB,DAL,300,6.92
-FLEX,Patrick Mahomes,QB,KC,10600,22.72
-FLEX,Dak Prescott,QB,DAL,10400,21.57
-FLEX,George Pickens,WR,DAL,9600,21.13
-FLEX,Rashee Rice,WR,KC,10000,20.84
-FLEX,Javonte Williams,RB,DAL,8400,16.94
-TOTAL,,,,49300,110.11999999999999
+Lineup,Roster Position,Player Name,Position,Team,Salary,Avg Points Per Game
+1,CPT,Miles Sanders,RB,DAL,300,6.92
+1,FLEX,Patrick Mahomes,QB,KC,10600,22.72
+1,FLEX,Dak Prescott,QB,DAL,10400,21.57
+1,FLEX,George Pickens,WR,DAL,9600,21.13
+1,FLEX,Rashee Rice,WR,KC,10000,20.84
+1,FLEX,Javonte Williams,RB,DAL,8400,16.94
+1,TOTAL,,,,49300,110.11999999999999
+,,,,,,
+2,CPT,Jalen Tolbert,WR,DAL,1500,3.92
+2,FLEX,Patrick Mahomes,QB,KC,10600,22.72
+2,FLEX,Dak Prescott,QB,DAL,10400,21.57
+2,FLEX,George Pickens,WR,DAL,9600,21.13
+2,FLEX,Rashee Rice,WR,KC,10000,20.84
+2,FLEX,Jake Ferguson,TE,DAL,7200,13.83
+2,TOTAL,,,,49300,104.00999999999999
+,,,,,,
+3,CPT,George Pickens,WR,DAL,14400,21.13
+3,FLEX,Patrick Mahomes,QB,KC,10600,22.72
+3,FLEX,Dak Prescott,QB,DAL,10400,21.57
+3,FLEX,George Pickens,WR,DAL,9600,21.13
+3,FLEX,Hollywood Brown,WR,KC,4000,9.72
+3,FLEX,Miles Sanders,RB,DAL,200,6.92
+3,TOTAL,,,,49200,103.18999999999998
+,,,,,,
+4,CPT,Jake Ferguson,TE,DAL,10800,13.83
+4,FLEX,Patrick Mahomes,QB,KC,10600,22.72
+4,FLEX,Dak Prescott,QB,DAL,10400,21.57
+4,FLEX,George Pickens,WR,DAL,9600,21.13
+4,FLEX,Javonte Williams,RB,DAL,8400,16.94
+4,FLEX,Miles Sanders,RB,DAL,200,6.92
+4,TOTAL,,,,50000,103.11
+,,,,,,
+5,CPT,Brandon Aubrey,K,DAL,7500,9.91
+5,FLEX,Patrick Mahomes,QB,KC,10600,22.72
+5,FLEX,Dak Prescott,QB,DAL,10400,21.57
+5,FLEX,George Pickens,WR,DAL,9600,21.13
+5,FLEX,Rashee Rice,WR,KC,10000,20.84
+5,FLEX,Miles Sanders,RB,DAL,200,6.92
+5,TOTAL,,,,48300,103.08999999999999

@@ -33,7 +33,7 @@ def load_position_requirements(config_path):
     return config
 
 
-def optimize_roster(players_df, position_requirements, max_salary):
+def optimize_roster(players_df, position_requirements, max_salary, previous_lineups=None, min_different_players=3):
     """
     Optimize roster selection using linear programming.
     
@@ -41,6 +41,8 @@ def optimize_roster(players_df, position_requirements, max_salary):
         players_df: DataFrame containing player information
         position_requirements: Dict with position requirements
         max_salary: Maximum total salary allowed
+        previous_lineups: List of sets containing player indices from previous lineups
+        min_different_players: Minimum number of players that must differ from previous lineups
     
     Returns:
         Tuple of (selected_players_df, total_points, total_salary, position_assignments)
@@ -89,8 +91,29 @@ def optimize_roster(players_df, position_requirements, max_salary):
         
         prob += lpSum(relevant_vars) == count, f"Position_{position}"
     
+    # Constraint: Ensure lineup differs from previous lineups
+    if previous_lineups:
+        for lineup_num, prev_lineup in enumerate(previous_lineups):
+            # For each previous lineup, ensure that at least min_different_players are different
+            # This means at most (total_players - min_different_players) can overlap
+            total_players = sum(position_requirements.values())
+            max_overlap = total_players - min_different_players
+            
+            # Get all variables for players in the previous lineup
+            overlap_vars = []
+            for prev_idx in prev_lineup:
+                relevant_vars = [var for (i, pos), var in player_position_vars.items() if i == prev_idx]
+                overlap_vars.extend(relevant_vars)
+            
+            if overlap_vars:
+                prob += lpSum(overlap_vars) <= max_overlap, f"Differ_from_Lineup_{lineup_num}"
+    
     # Solve the problem
     prob.solve()
+    
+    # Check if a solution was found
+    if prob.status != 1:  # 1 means optimal solution found
+        return None, None, None, None
     
     # Extract selected players and their assigned positions
     selected_data = []
@@ -111,84 +134,128 @@ def optimize_roster(players_df, position_requirements, max_salary):
     return selected_players, total_points, total_salary, position_assignments
 
 
-def generate_dk_output(selected_players, position_requirements, output_path):
+def generate_dk_output(all_lineups, position_requirements, output_path):
     """
-    Generate DraftKings-compatible CSV output.
+    Generate DraftKings-compatible CSV output for multiple lineups.
     
-    Format: Single row with player IDs in position order.
+    Format: One row per lineup with player IDs in position order.
+    
+    Args:
+        all_lineups: List of tuples (selected_players_df, total_points, total_salary, position_assignments)
+        position_requirements: Dict with position requirements
+        output_path: Path to save the output CSV
     """
-    # Create a single row with all player IDs organized by assigned position
-    lineup_row = {}
+    all_rows = []
     
-    # Sort positions to ensure consistent ordering
-    sorted_positions = sorted(position_requirements.keys())
-    
-    # For each required position, get assigned players
-    for position in sorted_positions:
-        count = position_requirements[position]
+    for selected_players, _, _, _ in all_lineups:
+        # Create a single row with all player IDs organized by assigned position
+        lineup_row = {}
         
-        # Find players assigned to this position
-        assigned = selected_players[selected_players['Assigned_Position'] == position]
+        # Sort positions to ensure consistent ordering
+        sorted_positions = sorted(position_requirements.keys())
         
-        # Assign the players for this position
-        for i, (idx, row) in enumerate(assigned.iterrows()):
-            # Create column name with index if multiple players for this position
-            if count > 1:
-                col_name = f"{position}{i + 1}"
-            else:
-                col_name = position
+        # For each required position, get assigned players
+        for position in sorted_positions:
+            count = position_requirements[position]
             
-            lineup_row[col_name] = row['ID']
+            # Find players assigned to this position
+            assigned = selected_players[selected_players['Assigned_Position'] == position]
+            
+            # Assign the players for this position
+            for i, (idx, row) in enumerate(assigned.iterrows()):
+                # Create column name with index if multiple players for this position
+                if count > 1:
+                    col_name = f"{position}{i + 1}"
+                else:
+                    col_name = position
+                
+                lineup_row[col_name] = row['ID']
+        
+        all_rows.append(lineup_row)
     
-    # Create DataFrame with a single row
-    output_df = pd.DataFrame([lineup_row])
+    # Create DataFrame with all lineups
+    output_df = pd.DataFrame(all_rows)
     
     # Save to CSV
     output_df.to_csv(output_path, index=False)
-    print(f"DraftKings output saved to: {output_path}")
+    print(f"DraftKings output saved to: {output_path} ({len(all_rows)} lineup(s))")
 
 
-def generate_human_readable_output(selected_players, total_points, total_salary, output_path):
+def generate_human_readable_output(all_lineups, output_path):
     """
-    Generate a human-readable CSV output with player details.
+    Generate a human-readable CSV output with player details for multiple lineups.
+    
+    Args:
+        all_lineups: List of tuples (selected_players_df, total_points, total_salary, position_assignments)
+        output_path: Path to save the output CSV
     """
-    # Sort by assigned position for better readability
-    sorted_players = selected_players.sort_values(['Assigned_Position', 'AvgPointsPerGame'], 
-                                                   ascending=[True, False])
+    all_data = []
     
-    # Select relevant columns
-    output_df = sorted_players[[
-        'Assigned_Position', 'Name', 'Position', 'TeamAbbrev', 
-        'Salary', 'AvgPointsPerGame'
-    ]].copy()
+    for lineup_num, (selected_players, total_points, total_salary, _) in enumerate(all_lineups, 1):
+        # Sort by assigned position for better readability
+        sorted_players = selected_players.sort_values(['Assigned_Position', 'AvgPointsPerGame'], 
+                                                       ascending=[True, False])
+        
+        # Add lineup number column
+        for _, row in sorted_players.iterrows():
+            all_data.append({
+                'Lineup': lineup_num,
+                'Roster Position': row['Assigned_Position'],
+                'Player Name': row['Name'],
+                'Position': row['Position'],
+                'Team': row['TeamAbbrev'],
+                'Salary': row['Salary'],
+                'Avg Points Per Game': row['AvgPointsPerGame']
+            })
+        
+        # Add summary row for this lineup
+        all_data.append({
+            'Lineup': lineup_num,
+            'Roster Position': 'TOTAL',
+            'Player Name': '',
+            'Position': '',
+            'Team': '',
+            'Salary': total_salary,
+            'Avg Points Per Game': total_points
+        })
+        
+        # Add blank row between lineups (except after the last one)
+        if lineup_num < len(all_lineups):
+            all_data.append({
+                'Lineup': '',
+                'Roster Position': '',
+                'Player Name': '',
+                'Position': '',
+                'Team': '',
+                'Salary': '',
+                'Avg Points Per Game': ''
+            })
     
-    output_df.columns = ['Roster Position', 'Player Name', 'Position', 'Team', 
-                         'Salary', 'Avg Points Per Game']
-    
-    # Add summary row
-    summary_row = pd.DataFrame([{
-        'Roster Position': 'TOTAL',
-        'Player Name': '',
-        'Position': '',
-        'Team': '',
-        'Salary': total_salary,
-        'Avg Points Per Game': total_points
-    }])
-    
-    output_df = pd.concat([output_df, summary_row], ignore_index=True)
+    output_df = pd.DataFrame(all_data)
     
     # Save to CSV
     output_df.to_csv(output_path, index=False)
     print(f"Human-readable output saved to: {output_path}")
     
-    # Print summary to console
+    # Print summary to console for each lineup
     print("\n" + "="*80)
-    print("OPTIMIZED ROSTER SUMMARY")
+    print(f"OPTIMIZED ROSTER SUMMARY - {len(all_lineups)} LINEUP(S)")
     print("="*80)
-    print(output_df.to_string(index=False))
-    print("="*80)
-    print(f"Total Salary: ${total_salary:,}")
-    print(f"Total Average Points: {total_points:.2f}")
+    
+    for lineup_num, (selected_players, total_points, total_salary, _) in enumerate(all_lineups, 1):
+        print(f"\nLINEUP #{lineup_num}")
+        print("-"*80)
+        
+        sorted_players = selected_players.sort_values(['Assigned_Position', 'AvgPointsPerGame'], 
+                                                       ascending=[True, False])
+        
+        for _, row in sorted_players.iterrows():
+            print(f"{row['Assigned_Position']:>15} {row['Name']:<25} {row['Position']:<4} "
+                  f"{row['TeamAbbrev']:<5} ${row['Salary']:>6,} {row['AvgPointsPerGame']:>6.2f} pts")
+        
+        print("-"*80)
+        print(f"{'TOTAL':>15} {'':<25} {'':<4} {'':<5} ${total_salary:>6,} {total_points:>6.2f} pts")
+    
     print("="*80)
 
 
@@ -215,6 +282,18 @@ def main():
         help='Maximum total salary for the roster'
     )
     parser.add_argument(
+        '--num-lineups',
+        type=int,
+        default=1,
+        help='Number of different lineups to generate (default: 1)'
+    )
+    parser.add_argument(
+        '--min-diff',
+        type=int,
+        default=3,
+        help='Minimum number of players that must differ between lineups (default: 3)'
+    )
+    parser.add_argument(
         '--dk-output',
         type=str,
         default='dk_lineup.csv',
@@ -238,18 +317,41 @@ def main():
     position_requirements = load_position_requirements(args.config)
     print(f"Position requirements: {position_requirements}")
     
-    # Optimize roster
-    print(f"\nOptimizing roster with max salary: ${args.max_salary:,}")
-    selected_players, total_points, total_salary, position_assignments = optimize_roster(
-        players_df, 
-        position_requirements, 
-        args.max_salary
-    )
+    # Optimize rosters
+    print(f"\nOptimizing {args.num_lineups} lineup(s) with max salary: ${args.max_salary:,}")
+    if args.num_lineups > 1:
+        print(f"Minimum different players between lineups: {args.min_diff}")
+    
+    all_lineups = []
+    previous_lineups = []
+    
+    for i in range(args.num_lineups):
+        print(f"\nOptimizing lineup {i + 1}/{args.num_lineups}...")
+        
+        selected_players, total_points, total_salary, position_assignments = optimize_roster(
+            players_df, 
+            position_requirements, 
+            args.max_salary,
+            previous_lineups if i > 0 else None,
+            args.min_diff
+        )
+        
+        if selected_players is None:
+            print(f"Warning: Could not generate lineup {i + 1}. Only {i} lineup(s) created.")
+            break
+        
+        all_lineups.append((selected_players, total_points, total_salary, position_assignments))
+        
+        # Track player indices for diversity constraint
+        player_indices = set(selected_players.index)
+        previous_lineups.append(player_indices)
+        
+        print(f"Lineup {i + 1}: {total_points:.2f} points, ${total_salary:,} salary")
     
     # Generate outputs
     print("\nGenerating output files...")
-    generate_dk_output(selected_players, position_requirements, args.dk_output)
-    generate_human_readable_output(selected_players, total_points, total_salary, args.readable_output)
+    generate_dk_output(all_lineups, position_requirements, args.dk_output)
+    generate_human_readable_output(all_lineups, args.readable_output)
     
     print("\nOptimization complete!")
 
