@@ -98,6 +98,17 @@ def optimize_roster(players_df, position_requirements, max_salary, previous_line
         if relevant_vars:
             prob += lpSum(relevant_vars) <= 1, f"Player_{idx}_Once"
     
+    # Constraint: Prevent the same player name from being selected multiple times
+    # (important for showdown slates where the same player appears as both CPT and FLEX)
+    unique_names = players_df['Name'].unique()
+    for player_name in unique_names:
+        # Get all indices for this player name
+        player_indices = players_df[players_df['Name'] == player_name].index
+        # Get all variables for this player across all positions
+        relevant_vars = [var for (i, pos), var in player_position_vars.items() if i in player_indices]
+        if relevant_vars:
+            prob += lpSum(relevant_vars) <= 1, f"Unique_Player_{player_name.replace(' ', '_').replace('.', '')}"
+    
     # Constraint: Exact number of players for each position
     for position, count in position_requirements.items():
         relevant_vars = [var for (idx, pos), var in player_position_vars.items() if pos == position]

@@ -4,16 +4,16 @@ Lineup,Roster Position,Player Name,Position,Team,Salary,Avg Points Per Game
 1,FLEX,Jaxson Dart,QB,NYG,10000,18.38
 1,FLEX,Wan'Dale Robinson,WR,NYG,9000,14.13
 1,FLEX,Stefon Diggs,WR,NE,8800,12.99
-1,FLEX,Isaiah Hodgins,WR,NYG,3600,11.45
-1,TOTAL,,,,48600,88.99000000000001
+1,FLEX,Rhamondre Stevenson,RB,NE,5000,8.87
+1,TOTAL,,,,50000,86.41000000000001
 ,,,,,,
-2,CPT,Jaxson Dart,QB,NYG,15000,18.38
+2,CPT,Rhamondre Stevenson,RB,NE,7500,8.87
 2,FLEX,Drake Maye,QB,NE,11800,20.59
 2,FLEX,Jaxson Dart,QB,NYG,10000,18.38
+2,FLEX,Wan'Dale Robinson,WR,NYG,9000,14.13
+2,FLEX,TreVeyon Henderson,RB,NE,8000,11.73
 2,FLEX,Isaiah Hodgins,WR,NYG,3600,11.45
-2,FLEX,Rhamondre Stevenson,RB,NE,5000,8.87
-2,FLEX,Younghoe Koo,K,NYG,4400,7.25
-2,TOTAL,,,,49800,84.92
+2,TOTAL,,,,49900,85.15
 ,,,,,,
 3,CPT,Isaiah Hodgins,WR,NYG,5400,11.45
 3,FLEX,Drake Maye,QB,NE,11800,20.59
@@ -23,18 +23,18 @@ Lineup,Roster Position,Player Name,Position,Team,Salary,Avg Points Per Game
 3,FLEX,Kayshon Boutte,WR,NE,6800,10.26
 3,TOTAL,,,,49400,83.05000000000001
 ,,,,,,
-4,CPT,Drake Maye,QB,NE,17700,20.59
+4,CPT,Russell Wilson,QB,NYG,9000,9.31
 4,FLEX,Drake Maye,QB,NE,11800,20.59
 4,FLEX,Jaxson Dart,QB,NYG,10000,18.38
+4,FLEX,Stefon Diggs,WR,NE,8800,12.99
 4,FLEX,Isaiah Hodgins,WR,NYG,3600,11.45
-4,FLEX,Andy Borregales,K,NE,4800,8.42
-4,FLEX,Daniel Bellinger,TE,NYG,1600,3.47
-4,TOTAL,,,,49500,82.9
+4,FLEX,Kayshon Boutte,WR,NE,6800,10.26
+4,TOTAL,,,,50000,82.98
 ,,,,,,
-5,CPT,Jaxson Dart,QB,NYG,15000,18.38
+5,CPT,Wan'Dale Robinson,WR,NYG,13500,14.13
 5,FLEX,Drake Maye,QB,NE,11800,20.59
-5,FLEX,Wan'Dale Robinson,WR,NYG,9000,14.13
+5,FLEX,Jaxson Dart,QB,NYG,10000,18.38
 5,FLEX,Isaiah Hodgins,WR,NYG,3600,11.45
 5,FLEX,Theo Johnson,TE,NYG,5800,9.31
-5,FLEX,Andy Borregales,K,NE,4800,8.42
-5,TOTAL,,,,50000,82.28
+5,FLEX,Rhamondre Stevenson,RB,NE,5000,8.87
+5,TOTAL,,,,49700,82.73
