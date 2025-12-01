@@ -12,8 +12,17 @@ import argparse
 from pathlib import Path
 
 
-def load_players(file_path):
-    """Load player data from CSV or Excel file."""
+def load_players(file_path, salary_floor=0):
+    """
+    Load player data from CSV or Excel file.
+    
+    Args:
+        file_path: Path to the player data file
+        salary_floor: Minimum salary threshold - players at or below this value will be excluded (default: 0)
+    
+    Returns:
+        DataFrame with player data, optionally filtered by salary floor
+    """
     file_ext = Path(file_path).suffix.lower()
     
     if file_ext in ['.xlsx', '.xls']:
@@ -22,6 +31,14 @@ def load_players(file_path):
         df = pd.read_csv(file_path)
     else:
         raise ValueError(f"Unsupported file format: {file_ext}. Please use .csv, .xlsx, or .xls")
+    
+    # Apply salary floor filter if specified
+    if salary_floor > 0:
+        original_count = len(df)
+        df = df[df['Salary'] > salary_floor].copy()
+        excluded_count = original_count - len(df)
+        if excluded_count > 0:
+            print(f"Excluded {excluded_count} player(s) with salary at or below ${salary_floor:,}")
     
     return df
 
@@ -294,6 +311,12 @@ def main():
         help='Minimum number of players that must differ between lineups (default: 3)'
     )
     parser.add_argument(
+        '--salary-floor',
+        type=int,
+        default=0,
+        help='Salary floor - exclude players with salary at or below this value (default: 0)'
+    )
+    parser.add_argument(
         '--dk-output',
         type=str,
         default='dk_lineup.csv',
@@ -310,7 +333,7 @@ def main():
     
     # Load data
     print(f"Loading players from: {args.players}")
-    players_df = load_players(args.players)
+    players_df = load_players(args.players, salary_floor=args.salary_floor)
     print(f"Loaded {len(players_df)} players")
     
     print(f"\nLoading position requirements from: {args.config}")
